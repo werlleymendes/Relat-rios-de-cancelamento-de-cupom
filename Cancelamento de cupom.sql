@@ -1,19 +1,5 @@
-SELECT * FROM consincomonitor.TB_DOCTOITEM A WHERE TRUNC(A.DTAHOREMISSAO) = '26-OCT-2025';
-
-SELECT d.nroempresa, d.nrocheckout, d.coo, d.serie FROM consincomonitor.TB_DOCTO d where d.dtamovimento = trunc(sysdate)-1;
-
-SELECT * FROM consincomonitor.Tb_Logsegdoctopdv a where a.dtamovimento = trunc(sysdate)-1;
-
-SELECT * FROM consincomonitor.tb_logsegurancapdv a where trunc(a.dtahoremissao) = '28-oct-2025' 
-and a.nroempresa = 4 and a.metodo IN ('mtCancelarCupom', 'mtCancelarCupomAnterior') and a.motivo is not null;
-
-
-
-SELECT * FROM consincomonitor.vmon_cupomfiscal a where a.dtamovimento = '28-oct-2025'
-
-SELECT table_name FROM all_all_tables a where a.owner = 'CONSINCOMONITOR' and a.table_name LIKE '%VENDA%';
-
-SELECT * 
+SELECT a.nroempresa num_loja, a.nrocheckout pdv, b.motivo, e.nome operador, 
+       c.nome autorizador, b.dtahoremissao, NVL(SUM(f.vlrtotal), 0) AS valor_total
        FROM consincomonitor.Tb_Logsegdoctopdv a 
          JOIN consincomonitor.tb_logsegurancapdv b 
               ON a.nroempresa = b.nroempresa AND
@@ -26,8 +12,17 @@ SELECT *
                  d.nrocheckout = a.nrocheckout and 
                  d.coo = a.coo and
                  d.serie = a.serie
-         WHERE a.dtamovimento = '28-oct-2025' and
-               trunc(d.dtahorinclusao) = '28-oct-2025' and
+         JOIN consincomonitor.tb_usuario e
+              ON d.sequsuario = e.sequsuario
+         LEFT OUTER JOIN consincomonitor.tb_doctoitem f
+              ON d.nroempresa = f.nroempresa and
+                 d.nrocheckout = f.nrocheckout and
+                 d.seqdocto = f.seqdocto and 
+                 f.status = 'V' and
+                 trunc(f.dtahoremissao) between :DT1 and :DT2 
+         WHERE a.dtamovimento between :DT1 and :DT2 and
+               trunc(d.dtahorinclusao) between :DT1 and :DT2 and
                b.metodo IN ('mtCancelarCupom', 'mtCancelarCupomAnterior') and
-               a.nroempresa = 4 and
-               b.motivo is not null;
+               a.nroempresa = :LS1 and
+               b.motivo is not null 
+         GROUP BY a.nroempresa, a.nrocheckout, b.motivo, e.nome, c.nome, b.dtahoremissao;

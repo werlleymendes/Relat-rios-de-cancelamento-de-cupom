@@ -1,8 +1,11 @@
-SELECT * FROM consincomonitor.TB_DOCTOITEM A WHERE TRUNC(A.DTAHOREMISSAO) = '26-OCT-2025';
+SELECT * FROM consincomonitor.tb_doctoitem A WHERE TRUNC(A.DTAHOREMISSAO) = '26-OCT-2025';
 
 SELECT d.nroempresa, d.nrocheckout, d.coo, d.serie FROM consincomonitor.TB_DOCTO d where d.dtamovimento = trunc(sysdate)-1;
 
 SELECT * FROM consincomonitor.Tb_Logsegdoctopdv a where a.dtamovimento = trunc(sysdate)-1;
+
+SELECT * FROM consincomonitor.tb_logsegurancapdv a where trunc(a.dtahoremissao) = '28-oct-2025' 
+and a.nroempresa = 4 and a.metodo IN ('mtCancelarCupom', 'mtCancelarCupomAnterior') and a.motivo is not null;
 
 
 
@@ -10,7 +13,8 @@ SELECT * FROM consincomonitor.vmon_cupomfiscal a where a.dtamovimento = '28-oct-
 
 SELECT table_name FROM all_all_tables a where a.owner = 'CONSINCOMONITOR' and a.table_name LIKE '%VENDA%';
 
-SELECT DISTINCT a.nrocheckout, b.motivo, b.sequsuario, c.nome 
+SELECT a.nroempresa num_loja, a.nrocheckout pdv, b.motivo, e.nome operador, 
+       c.nome autorizador, b.dtahoremissao, SUM(f.vlrtotal)
        FROM consincomonitor.Tb_Logsegdoctopdv a 
          JOIN consincomonitor.tb_logsegurancapdv b 
               ON a.nroempresa = b.nroempresa AND
@@ -23,6 +27,17 @@ SELECT DISTINCT a.nrocheckout, b.motivo, b.sequsuario, c.nome
                  d.nrocheckout = a.nrocheckout and 
                  d.coo = a.coo and
                  d.serie = a.serie
+         JOIN consincomonitor.tb_usuario e
+              ON d.sequsuario = e.sequsuario
+         JOIN consincomonitor.tb_doctoitem f
+              ON d.nroempresa = f.nroempresa and
+                 d.nrocheckout = f.nrocheckout and
+                 d.seqdocto = f.seqdocto
          WHERE a.dtamovimento = '28-oct-2025' and
-               b.metodo = 'mtCancelarCupom' and
-               a.nroempresa = 4;
+               trunc(d.dtahorinclusao) = '28-oct-2025' and
+               b.metodo IN ('mtCancelarCupom', 'mtCancelarCupomAnterior') and
+               a.nroempresa = 4 and
+               b.motivo is not null and
+               f.status = 'V' and
+               trunc(f.dtahoremissao) = '28-oct-2025'
+         GROUP BY a.nroempresa, a.nrocheckout, b.motivo, e.nome, c.nome, b.dtahoremissao;
