@@ -1,4 +1,5 @@
-SELECT *
+SELECT DISTINCT a.nroempresa num_loja, a.nrocheckout pdv, e.nome operador, 
+       c.nome autorizador, b.dtahoremissao, f.vlrtotal
        FROM consincomonitor.Tb_Logsegdoctopdv a 
          JOIN consincomonitor.tb_logsegurancapdv b 
               ON a.nroempresa = b.nroempresa AND
@@ -26,5 +27,3 @@ SELECT *
                b.metodo = 'mtCancelarItem' and
                a.nroempresa = 3;
          
-SELECT j.nroempresa, j.nrocheckout, j.seqlogsegpdv FROM consincomonitor.tb_logsegurancapdv j 
-       where j.nroempresa = 3 and trunc(j.dtahoremissao) between '02-nov-2025' and '02-nov-2025' and j.metodo in ('mtCancelarCupom', 'mtCancelarCupomAnterior')

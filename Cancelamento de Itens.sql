@@ -19,11 +19,11 @@ SELECT DISTINCT a.nroempresa num_loja, a.nrocheckout pdv, e.nome operador,
                  d.nrocheckout = f.nrocheckout and
                  d.seqdocto = f.seqdocto and                 
                  f.status = 'C' and
-                 trunc(f.dtahoremissao) between '02-nov-2025' and '02-nov-2025'
+                 trunc(f.dtahoremissao) between :DT1 and :DT2
          JOIN consincomonitor.tb_produto g
               ON f.seqproduto = g.seqproduto
-         WHERE a.dtamovimento between '02-nov-2025' and '02-nov-2025' and
-               trunc(d.dtahorinclusao) between '02-nov-2025' and '02-nov-2025' and
+         WHERE a.dtamovimento between :DT1 and :DT2 and
+               trunc(d.dtahorinclusao) between :DT1 and :DT2 and
                b.metodo = 'mtCancelarItem' and
-               a.nroempresa = 3;
-         
+               a.nroempresa = :LS1
+         ORDER BY b.dtahoremissao;
