@@ -1,4 +1,4 @@
-SELECT DISTINCT a.nroempresa num_loja, a.nrocheckout pdv, e.nome operador, 
+SELECT DISTINCT a.nroempresa num_loja, g.seqproduto, g.desccompleta, a.nrocheckout pdv, e.nome operador, 
        c.nome autorizador, b.dtahoremissao, f.vlrtotal
        FROM consincomonitor.Tb_Logsegdoctopdv a 
          JOIN consincomonitor.tb_logsegurancapdv b 
